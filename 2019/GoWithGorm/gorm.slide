@@ -1,0 +1,198 @@
+# Cur i láthair: Go w/SQL Databases using Gorm
+# 23 January, 2019
+#
+Go w/SQL Databases using Gorm
+
+Go Phoenix-Chandler Programmers
+18:30 23 Jan 2019
+Tags: go golang go-phoenix-chandler
+
+Brian Downs
+Software Engineer, Myndshft
+
+http://briandowns.github.io
+https://github.com/go-phoenix-chandler
+@bdowns328 @golangPhoenix
+
+* What is Gorm?
+
+Gorm is an ORM for Go. Some of the more notable features:
+
+- Full-Featured ORM (almost)
+- Associations (Has One, Has Many, Belongs To, Many To Many, Polymorphism)
+- Callbacks (Before/After Create/Save/Update/Delete/Find)
+- Preloading (eager loading)
+- Transactions
+- Composite Primary Key
+- SQL Builder
+- Auto Migrations
+- Logger
+- Extendable, write Plugins based on GORM callbacks
+
+* Installation
+
+Install is as simple as running the command below.
+
+    go get -u github.com/jinzhu/gorm
+
+* Supported Dialects
+
+- MySQL
+- Postgres
+- SQLite
+- MS SQL Server
+
+* Connecting to a MySQL Database
+
+    import (
+        "github.com/jinzhu/gorm"
+        _ "github.com/jinzhu/gorm/dialects/mysql"
+    )
+
+    func main() {
+        db, err := gorm.Open("mysql", "root:root@tcp(127.0.0.1:3306)/golangphoenix?charset=utf8&parseTime=True")
+        if err != nil {
+            return err
+        }
+        defer db.Close()
+    }
+
+* Connecting to a Postgres Database
+
+    import (
+        "github.com/jinzhu/gorm"
+        _ "github.com/jinzhu/gorm/dialects/postgres"
+    )
+
+    func main() {
+        db, err := gorm.Open("postgres", "host=myhost port=myport user=root dbname=golangphoenix password=")
+        if err != nil {
+            return err
+        }
+        defer db.Close()
+    }
+
+* Modeling Data
+
+    type Person struct {
+        gorm.Model
+        FirstName string `gorm:"column:first_name,index:idx_name"`
+        LastName  string `gorm:"column:last_name,index:idx_name", json:"last_name"`
+        Address   string `gorm:"column:address"`
+        Age       uint   `gorm:"column:age"`
+    }
+
+* Modelling Data cont...
+
+Gorm comes with a helper struct for common columns and to easily make your data uniform for primary keys.
+
+    type Model struct {
+        ID        uint `gorm:"primary_key"`
+        CreatedAt time.Time
+        UpdatedAt time.Time
+        DeletedAt *time.Time
+    }
+
+* Building a Schema
+
+Gorm supports migrations (with limitations). Major table alterations aren't supported. 
+
+Capabilities:
+
+- Create Tables
+- Add Columns
+
+Limitations:
+
+- Unable to change existing column types
+- Will not run destructive ALTER statements in favor of data integrity. ie removing columns
+
+* Applying the Schema
+
+    db.CreateTable(&Person{})
+
+* Modifying the Schema
+
+The easiest way to create tables or adjust tables is to perform a database migration. 
+
+    db.AutoMigrate(&Person{})
+
+The `AutoMigrate` method supports multiple table names.
+
+    db.AutoMigrate(&Person{}, &Occupation{}, &Pet{})
+
+Gorm will look at the struct and it's tags and make the necessary adjustments.
+
+In actual practice, this is great to put behind a CLI flag.
+
+* Inserting Data 
+
+Inserting data is as simple as populating the previously defined `Person` struct and calling the `NewRecord` method.
+
+    person := Person{
+        FirstName: "Jimmy", 
+        LastName: "Topics", 
+        Address: "123 Acacia Ave.", 
+        Age: 80,
+    }
+    db.NewRecord(&p)
+
+* Retrieving Data
+
+Gorm provides a number of different ways to retrieve data from your database.
+
+Find the first record that matches the criteria:
+
+    db.First(&Person{FirstName: "Scotty"})
+
+Find the last record that matches the criteria:
+
+    db.Last(&Person{LastName: "DeBull"})
+
+Find all records that match:
+
+    db.Find(&Person{LastName: "Smith"})
+
+* With a SQL Where Clause
+
+If you want to write your own SQL where clause, you can call the `Where` method. 
+
+    var people []Person
+    db.Where("last_name = ?", "Smith").Find(&people)
+
+* Raw SQL Queries
+
+There are times where using an ORM isn't the best route and you want to execute raw SQL. Gorm makes doing so easy.
+
+    const query = "SELECT first_name FROM PERSONS WHERE age > ?"
+    db.Raw(query, 48).Scan(&Person{})
+
+* Transactions
+
+    tx := db.Begin()
+    if err := tx.Create(&Person{FistName: "Joda"}).Error; err != nil {
+        tx.Rollback()
+        return err
+    }
+    if err := tx.Commit().Error != nil {
+        log.Println(err)
+        return
+    }
+
+* Performance 
+
+Gorm relies heavily on reflection and as a result there's a performance cost. The upside to this is that the cost is low by comparison to using the `database/sql` package.
+
+* Important Things Not Covered
+
+- Error handling!
+
+* Ignore Example
+
+    type Person struct {
+        DontEvenCare string `gorm:"-"`
+    }
+
+* Conclusion
+
+Gorm is a great package to model data and use to simplify interacting with a database. 
