@@ -1,0 +1,53 @@
+# Cur i láthair: How to Write A Simple REST API
+# 26 February, 2019
+#
+How to Write A Simple REST API
+
+Go Phoenix-Chandler Programmers
+18:30 26 Feb 2019
+Tags: go golang go-phoenix-chandler
+
+Brian Downs
+Software Engineer, Myndshft
+
+http://briandowns.github.io
+https://github.com/go-phoenix-chandler
+@bdowns328 @golangPhoenix
+
+* What is REST?
+
+- REST stands for "Representational State Transfer"
+- Architectual style for building web services
+
+* Why REST?
+
+- Binds existing standards and technologies together like the methods in RFC 2616.
+ - GET, POST, PUT, DELETE
+
+* Why JSON?
+
+- Ubiquitous in frontend environments
+- Simple for people and machines
+
+* What do we want to build?
+
+* Access Patterns
+
+- How do we want to access our data? 
+- What do we need to do with this data?
+
+* Building Routes
+
+The API routes should be obvious if possible.
+
+* Data Modeling
+
+* Requests and Responses
+
+Having a specific contracts between the API and the consumer is a critical component to REST API's. These contracts should be rock solid and never leave room for ambiguity.
+
+* Error Handling
+
+* Conclusion
+
+REST is a style of building web services that takes advantage of existing standards and technologies to allow for building simple, reliable, and performant systems.
