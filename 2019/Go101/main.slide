@@ -1,0 +1,448 @@
+# Cur i láthair: Go 101
+# 29 May, 2019
+#
+# Header for first and last slide
+#
+# Fráma 
+Go Programming Language 101
+GolangPhoenix
+18:30 29 May 2019
+Tags: go golang go-phoenix-chandler
+
+Brian Downs
+Software Engineer
+
+https://github.com/go-phoenix-chandler
+@bdowns328
+
+# Fráma 
+* Installation
+
+Go can be installed via package managers or by downloading a specific tarball/binary version from here: *https://golang.org/dl/*
+
+Mac OS X
+
+ brew update && brew install hg && brew install go
+
+Debian/Ubuntu
+
+ sudo add-apt-repository ppa:gophers/go
+ sudo apt-get update
+ sudo apt-get install golang-stable
+
+Manual Installation
+
+ wget https://dl.google.com/go/go1.12.5.darwin-amd64.tar.gz
+ tar -C /usr/local -xzf go1.12.5.darwin-amd64.tar.gz
+
+# Fráma 
+* Directory Structure
+
+The go directory structure is called a *workspace* and is a critical compontent in setting up a correct environment.  If this isn't done correctly, the `go` `get` command as well as others will not work.
+
+ mkdir -p ~/gocode/src ~/gocode/bin ~/gocode/pkg
+ mkdir -p ~/gocode/src/github.com/<username>
+ mkdir -p ~/gocode/src/bitbucket.org/<username>
+
+- src: Go source files organized into packages (one package per directory)
+- pkg: package objects
+- bin: executable commands
+
+.iframe http://golang.org/doc/gopher/ref.png
+
+# Fráma 
+* Environment Variables
+
+ export GOROOT=/usr/local/go
+ export PATH=PATH:$GOROOT/bin
+ export GOPATH=/Users/<user>/gocode
+
+These environment variables are needed for `import` statements, the `go` `get` command, etc.
+
+Now we're ready to Go...
+
+.image http://blog.golang.org/go-11-is-released_gopherbiplane5.jpg
+
+# Fráma 
+* IDE Setup
+
+.iframe http://occs.cs.oberlin.edu/wp-content/uploads/2010/09/vim_logo.png 120 300
+ :GoInstallBinaries
+
+ syntax on
+ set runtimepath+=$GOROOT/misc/vim
+ set runtimepath+=$GOPATH/src/github.com/golang/lint/misc/vim
+ Bundle "fatih/vim-go"
+ Bundle "nsf/gocode"
+ let g:go_fmt_command = "goimports"
+ let g:go_fmt_fail_silently = 1
+ let g:go_fmt_command = "gofmt"
+ au BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
+ au FileType go nmap gd <Plug>(go-def)
+ au FileType go nmap <Leader>s <Plug>(go-def-split)
+ au FileType go nmap <Leader>v <Plug>(go-def-vertical)
+ au FileType go nmap <Leader>t <Plug>(go-def-tab)
+ au FileType go nmap <Leader>i <Plug>(go-info)
+ au FileType go nmap <leader>r <Plug>(go-run)
+ au FileType go nmap <leader>b <Plug>(go-build)
+ au FileType go nmap <Leader>d <Plug>(go-doc)
+
+# Fráma 
+* ...continued
+
+.iframe http://img.jcabi.com/intellijidea.png 200 _
+- http://plugins.jetbrains.com/plugin/5047
+
+.iframe http://eclip.se/images/eclipse-logo.png 109 _
+- https://code.google.com/p/goclipse/
+
+# Fráma 
+* Go Tools
+
+- go env
+- go get
+- go fmt
+- go run
+- go fix
+- go test
+- go vet
+- go doc
+
+.iframe http://www.slate.com/content/dam/slate/articles/technology/technology/2014/06/140604_TECH_GoGopher.jpg.CROP.original-original.jpg 500 500
+
+# Fráma 
+* go env
+
+ go env
+
+These values are easily accessed or set with the `os` package.
+
+Output
+
+ GOARCH="amd64"
+ GOBIN=""
+ GOCHAR="6"
+ GOEXE=""
+ GOHOSTARCH="amd64"
+ GOHOSTOS="darwin"
+ GOOS="darwin"
+ GOPATH="/Users/bdowns/gocode"
+ GORACE=""
+ GOROOT="/usr/local/go"
+ GOTOOLDIR="/usr/local/go/pkg/tool/darwin_amd64"
+ CC="clang"
+ GOGCCFLAGS="-fPIC -m64 -pthread -fno-caret-diagnostics -Qunused-arguments -fmessage-length=0 -fno-common"
+ CXX="clang++"
+ CGO_ENABLED="1"
+
+# Fráma 
+* go get
+
+`go` `get` downloads and installs the packages named by the import paths, along with their dependancies.
+
+One of the more popular flags given to the get argument is `-u` which tells `go` `get` to update the named packages and their dependencies.
+
+Examples:
+
+- Installation Package
+
+ go get github.com/gin-gonic/gin
+
+- Upgrade Package
+
+ go get -u github.com/briandowns/openweathermap
+
+# Fráma 
+* go fmt
+
+`go` `fmt` will automatically format your code for a specified file or all Go files in the directory it's executed in.
+
+From the Go blog, go formatted code is:
+
+- easy to _write_
+- easy to _read_
+- easier to _maintain_
+- _uncontroversial_
+
+You can specify a format that the `go` `fmt` utility will follow though it's generally viewed as an unnecessary practice.
+
+# Fráma 
+
+# Fráma 
+* go run
+
+`go` `run` compiles and runs the main package comprising the named Go source files.  A Go source file needs to have a ".go" extension.
+
+Example 1
+
+- Run 1 go file
+
+ go run app.go
+
+Example 2
+
+- Run multiple go files that are dependant upon each other.
+
+ go run app.go database.go
+
+*Stupid*  *moment* *:* This caught me off gaurd one day when my app wouldn't connect to the database.  I had a separate database file to control access.  I realized that of course all I had to do was to give the database file as another argument as there'd be no other way for the app.go to know about database.go, post compilation.
+
+# Fráma 
+* go fix
+
+`go` `fix` finds Go programs that use old API's and rewrites them to use newer ones.  After you update to a new Go release, `go` `fix` helps make the necessary changes to your programs.
+
+*Warning:* `go` `fix` _does_ _not_ create backup files.
+
+Example 1
+
+ go tool fix -r openweathermap
+
+The "-r" flag tells the `go` `tool` `fix` command to only "fix" the specified file(s).
+
+# Fráma 
+* go test
+
+Go test files get named with "_test.go" in a 1-to-1 relationship with the files containing the code to be tested.
+
+* When you have a 
+
+To run all tests in the current directory with verbose output:
+
+ go test -v ./...
+
+ go test -cover
+
+# Fráma 
+* go test benchmark
+
+The `testing` package provides the ability for an engineer to benchmark Go code.  The benchmarks get run after the tests.  If you want to disable the tests, you can give a regex to the `-run=xxx` argument and no tests will be run.
+
+
+# Fráma 
+* go vet
+
+`go` `vet` examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string. Vet uses heuristics that do not guarantee all reports are genuine problems, but it can find errors not caught by the compilers.
+
+# Fráma 
+* Go Doc
+
+`godoc`, like other packages (JavaDoc, Sphinx) that will generate documentation based on comment blocks or docstrings, will generate documentation from your comments AND will analyze your code to get the rest of the information like return values, types, etc.  The HTML pages can be accessed locally by running the below command:
+
+ godoc -http:8888
+
+There are a number of services online that will provide you rendered documentation pages for your packages.  The most popular is godoc.org.  An example of this would be:
+
+ http://godoc.org/github.com/briandowns/GoPasswordUtilities
+
+# Fráma 
+* Go Lint
+
+`golint` will Lint a file, directory, or a package provided at the CLI or via a plugin for Vim.
+
+Example 1
+
+- By package
+
+ golint github.com/fatih/color
+
+Example 2
+
+- By file
+
+ cd $GOPATH/github.com/briandowns/go_project && golint file.go
+
+Example 3
+
+- By directory
+
+ cd $GOPATH/github.com/mitchellh/packer && golint .
+
+
+# Frame
+* Pointers
+
+- Pointers are values that store memory addresses
+
+x := 10
+y := &x
+z := *y
+fmt.Println(z) // 10
+
+# Frame
+* Types
+
+* Numbers
+
+- int - size dependent on architecture: 32 or 64 bit
+- int8, int16, int32, int64
+- uint8, uint16, uint32, uint64
+- float32, float64
+- complex64, complex128
+
+# Frame
+* Strings
+
+- A string is a byte slice under the hood
+
+# Frame
+* Maps
+
+- Hashmap data structure
+- Default size is 8 buckets with each being able to hold 8 entries
+- Reference type: contains a pointer to the underlying memory
+
+# Frame
+* Slices
+
+- Reference type: contains a pointer to the underlying data
+- 24 byte value: ptr to data, int for len, and int for cap
+
+# Frame
+* Booleans
+
+- true / false
+
+# Frame
+* struct
+
+- user defined memory layout
+- can contain fields of any type
+
+# Frame
+* Interfaces
+
+- used for 2 purposes
+- can be used to reprsent any value
+- used to define a set of behavior
+
+# Frame
+* Zero Value
+
+- ints: 0
+- floats: 0.0
+- bool: false
+- strings: ""
+- structs, channels, pointers, maps, slices: nil
+
+# Frame
+* Use the 0 Value!
+
+- Keep code simple and clean and use the 0 value.
+
+ var s string // rather than s := ""
+ var i int    // rather than i := 0
+ var b bool   // rather than b := false
+
+# Frame
+* Channels
+
+- Buffered and unbuffered
+- Bidirectional
+- can be shared across goroutines
+
+ c := make(chan, int)
+ c <- 10
+
+# Frame
+* Exercice
+
+- Write a program that iterates over a slice of integers, 10008, 44, 99999, and 54321, multiplies each by 2 and prints the results using printf.
+
+# Frame
+* Error Handling
+
+- Common pattern is that functions/methods return some value and an error value.
+- Errors should be checked immediately after a call.
+- Pedantic but critical and necessary
+
+ v, err := someFunc()
+ if err != nil {
+    // something with the error
+    return err
+ }
+
+# Frame
+* Functions
+
+  func doubleIfEven(x int) (int, error) {
+      if (x % 2 == 0) {
+          return x * 2, nil
+      }
+      return 0, errors.New("argument not even")
+  }
+
+# Frame 
+* Methods
+
+- Methods are functions that are bound to types. 
+
+  type myNumber struct {
+      x int
+  }
+  func (m myNumber) doubleIfEven(x int) (int, error) {
+      if (x % 2 == 0) {
+          return x * 2, nil
+      }
+      return 0, errors.New("argument not even")
+  }
+
+# Frame
+* Packages
+
+- Abstracting away logic
+- Create APIs
+
+# Fráma 
+* Online Tools
+
+# Fráma 
+* GoCover.io
+
+- Provides a line by line analysis of your package's test coverage.
+- Supports multiple version of Go.
+
+.iframe http://gocover.io 475 980
+
+# Fráma 
+* .
+
+.iframe http://play.golang.org 780 1000
+
+# Fráma 
+* Presentation Software
+
+- Installation
+
+ go get code.google.com/p/go.tools/cmd/present
+
+- Run `present` (Server gets launched and runs locally on port 1399)
+
+ Title of slide or section (must have asterisk)
+
+ ** Subsection
+
+ - bullets
+
+   Preformatted text
+   is indented (however you like)
+
+ .code x.go /^func main/,/^}/
+ .play y.go
+ .image image.jpg
+ .iframe http://foo
+ .link http://foo label
+ .html file.html
+ .caption _Gopher_ by [[http://www.reneefrench.com][Renée French]]
+
+# Fráma 
+* Conclusion
+
+- Simple install from a tarball or package
+- Quick configuration: environment variables and directories
+- Tons of tools that make coding fun and easy
+- Tons of tools that lead to better code
+- Tools for keeping code sane and viable for others to use
+
+.iframe http://blog.golang.org/gopher/logo.png 500 1000
+
